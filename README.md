@@ -29,6 +29,7 @@ What I'm doing here is mostly collecting useful snippets from all over the inter
     - [Disable Image Hotlinking](#disable-image-hotlinking)
     - [Password Protect a Directory](#password-protect-a-directory)
     - [Password Protect a File or Several Files](#password-protect-a-file-or-several-files)
+    - [Prevent some scripts from executing](#prevent-some-scripts-from-executing)
 - [Performance](#performance)
     - [Compress Text Files](#compress-text-files)
     - [Set Expires Headers](#set-expires-headers)
@@ -41,6 +42,7 @@ What I'm doing here is mostly collecting useful snippets from all over the inter
     - [Allow Cross-Domain Fonts](#allow-cross-domain-fonts)
     - [Auto UTF-8 Encode](#auto-utf-8-encode)
     - [Switch to Another PHP Version](#switch-to-another-php-version)
+    - [Set Time Zone](#set-time-zone)
 
 ## Rewrite and Redirection
 Note: It is assumed that you have `mod_rewrite` installed and enabled.
@@ -259,6 +261,16 @@ Require valid-user
 </FilesMatch>
 ```
 
+### Prevent some scripts from executing
+``` apacheconf
+Options -ExecCGI
+AddHandler cgi-script <file extension>
+
+# For example:
+Options -ExecCGI
+AddHandler cgi-script .pl .py .sh .cgi
+```
+
 ## Performance
 ### Compress Text Files
 ``` apacheconf
@@ -432,4 +444,12 @@ AddHandler application/x-httpd-php55 .php
 
 # Alternatively, you can use AddType
 AddType application/x-httpd-php55 .php
+```
+
+### Set Time Zone
+``` apacheconf
+SetEnv TZ <val>
+
+# For example:
+SetEnv TZ America/New_York
 ```

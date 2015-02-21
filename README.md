@@ -11,9 +11,11 @@ What I'm doing here is mostly collecting useful snippets from all over the inter
     - [Force www](#force-www)
     - [Force www in a Generic Way](#force-www-in-a-generic-way)
     - [Force non-www](#force-non-www)
+    - [Force non-www in a Generic Way](#force-non-www-in-a-generic-way)
     - [Force HTTPS](#force-https)
     - [Force HTTPS Behind a Proxy](#force-https-behind-a-proxy)
     - [Force Trailing Slash](#force-trailing-slash)
+    - [Remove Trailing Slash](#remove-trailing-slash)
     - [Redirect a Single Page](#redirect-a-single-page)
     - [Alias a Single Directory](#alias-a-single-directory)
     - [Alias Paths to Script](#alias-paths-to-script)
@@ -62,11 +64,20 @@ RewriteRule ^ http%1://www.%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 This works for _any_ domain. [Source](https://stackoverflow.com/questions/4916222/htaccess-how-to-force-www-in-a-generic-way)
 
 ### Force non-www
-It's [still](http://www.sitepoint.com/domain-www-or-no-www/) [open](https://devcenter.heroku.com/articles/apex-domains) [for](http://yes-www.org/) [debate](http://no-www.org/) whether www or non-www is the master race, so if you happen to be a fan or bare domains, here you go:
+It's [still](http://www.sitepoint.com/domain-www-or-no-www/) [open](https://devcenter.heroku.com/articles/apex-domains) [for](http://yes-www.org/) [debate](http://no-www.org/) whether www or non-www is the way to go, so if you happen to be a fan of bare domains, here you go:
 ``` apacheconf
 RewriteEngine on
 RewriteCond %{HTTP_HOST} ^www\.example\.com [NC]
 RewriteRule ^(.*)$ http://example.com/$1 [L,R=301]
+```
+
+### Force non-www in a Generic Way
+``` apacheconf
+RewriteEngine on
+RewriteCond %{HTTP_HOST} ^www\.
+RewriteCond %{HTTPS}s ^on(s)|off
+RewriteCond http%1://%{HTTP_HOST} ^(https?://)(www\.)?(.+)$
+RewriteRule ^ %1%3%{REQUEST_URI} [R=301,L]
 ```
 
 ### Force HTTPS
@@ -89,6 +100,11 @@ RewriteCond %{REQUEST_URI} /+[^\.]+$
 RewriteRule ^(.+[^/])$ %{REQUEST_URI}/ [R=301,L]
 ```
 
+### Remove Trailing Slash
+``` apacheconf
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /$1 [R=301,L]
+```
 ### Redirect a Single Page
 ``` apacheconf
 Redirect 301 /oldpage.html http://www.yoursite.com/newpage.html
@@ -348,6 +364,7 @@ If you don't control versioning with filename-based cache busting, consider lowe
     ExpiresByType application/rss+xml                   "access plus 1 hour"
 
   # Web fonts
+    ExpiresByType application/font-woff2                "access plus 1 month"
     ExpiresByType application/font-woff                 "access plus 1 month"
     ExpiresByType application/vnd.ms-fontobject         "access plus 1 month"
     ExpiresByType application/x-font-ttf                "access plus 1 month"
@@ -407,7 +424,7 @@ Sometimes you want to force the browser to display some content instead of downl
 CDN-served webfonts might not work in Firefox or IE due to [CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing). The following snippet from [alrra](https://github.com/h5bp/server-configs-apache/issues/32) should make it happen.
 ``` apacheconf
 <IfModule mod_headers.c>
-    <FilesMatch "\.(eot|otf|ttc|ttf|woff)$">
+    <FilesMatch "\.(eot|otf|ttc|ttf|woff|woff2)$">
         Header set Access-Control-Allow-Origin "*"
     </FilesMatch>
 </IfModule>
